@@ -32,9 +32,13 @@ typedef struct Id3Tag
 // Returns true if `mp3File` contains an ID3 tag.
 bool IsId3TagPresent(FILE *mp3File);
 
-// Converts the header size from an ID3 tag to big endian, if the system works with little endian.
-// This function takes the 28-bit format of header sizes into account.
-void ConvertHeaderSizeToBigEndian(int32_t *headerSize);
+// Returns the big-endian encoding of a little-endian value, and vice versa.
+void SwitchEndianness(int64_t *value);
+
+// Decodes the value represented by a synchsafe-encoded variable.
+void DecodeSynchsafe(int64_t *value);
+
+void SwitchEndiannessAndDecodeSynchsafe(int64_t *value);
 
 // Passes the ID3 tag information from `mp3File` to an `Id3Tag` struct.
 // Returns `true` if successful, or `false` if the file does not contain an ID3 tag.

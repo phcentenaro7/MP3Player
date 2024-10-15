@@ -9,13 +9,34 @@ bool IsId3TagPresent(FILE *mp3File)
     return (fileStart[0] == 'I' && fileStart[1] == 'D' && fileStart[2] == '3');
 }
 
-void ConvertHeaderSizeToBigEndian(int32_t *headerSize)
+void SwitchEndianness(int64_t *value)
 {
-    *headerSize = 0 | ((*headerSize & 0x7F000000) >> 24)
-                    | ((*headerSize & 0x7F0000) >> 9)
-                    | ((*headerSize & 0x7F00) << 6)
-                    | ((*headerSize & 0x7F) << 21);
-    printf("%x\n", *headerSize);
+    *value = 0 | ((*value >> 56) & (int64_t)0Xff)
+               | ((*value >> 40) & (int64_t)0xff00)
+               | ((*value >> 24) & (int64_t)0xff0000)
+               | ((*value >> 8)  & (int64_t)0xff000000)
+               | ((*value & (int64_t)0xff000000) << 8)
+               | ((*value & (int64_t)0xff0000) << 24)
+               | ((*value & (int64_t)0xff00) << 40)
+               | ((*value & (int64_t)0xff) << 56);
+}
+
+void DecodeSynchsafe(int64_t *value)
+{
+    *value = 0 | (*value & 0xff)
+               | ((*value & (int64_t)0xff00) >> 1)
+               | ((*value & (int64_t)0xff0000) >> 2)
+               | ((*value & (int64_t)0xff000000) >> 3)
+               | ((*value & 0xff00000000) >> 4)
+               | ((*value & 0xff0000000000) >> 5)
+               | ((*value & 0xff000000000000) >> 6)
+               | ((*value & 0xff00000000000000) >> 7);
+}
+
+void SwitchEndiannessAndDecodeSynchsafe(int64_t *value)
+{
+    SwitchEndianness(value);
+    DecodeSynchsafe(value);
 }
 
 bool LoadId3Tag(FILE *mp3File, Id3Tag *tag)
@@ -27,11 +48,11 @@ bool LoadId3Tag(FILE *mp3File, Id3Tag *tag)
     fread(&(tag->version), sizeof(int16_t), 1, mp3File);
     fread(&(tag->flags), sizeof(int8_t), 1, mp3File);
     fread(&(tag->headerSize), sizeof(int32_t), 1, mp3File);
-    ConvertHeaderSizeToBigEndian(&(tag->headerSize));
+    SwitchEndiannessAndDecodeSynchsafe(tag->headerSize);
     if(tag->flags & ID3_FLAG_EXTENDED_HEADER)
     {
         fread(&(tag->extendedHeaderSize), sizeof(int32_t), 1, mp3File);
-        ConvertHeaderSizeToBigEndian(&(tag->extendedHeaderSize));
+        SwitchEndiannessAndDecodeSynchsafe(tag->extendedHeaderSize);
         fread(&(tag->numberOfFlagBytes), sizeof(int8_t), 1, mp3File);
         fread(&(tag->extendedFlags), sizeof(int8_t), 1, mp3File);
     }
