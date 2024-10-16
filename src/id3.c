@@ -36,8 +36,8 @@ void LoadId3Header(FILE *mp3File, Id3Tag *tag)
 {
     fread(&(tag->version), sizeof(int16_t), 1, mp3File);
     fread(&(tag->flags), sizeof(int8_t), 1, mp3File);
-    fread(&(tag->headerSize), sizeof(int32_t), 1, mp3File);
-    tag->headerSize = (int32_t)DecodeSynchsafe(SwitchEndianness(tag->headerSize) >> 32);
+    fread(&(tag->size), sizeof(int32_t), 1, mp3File);
+    tag->size = (int32_t)DecodeSynchsafe(SwitchEndianness(tag->size) >> 32);
 }
 
 void LoadId3ExtendedHeader(FILE *mp3File, Id3Tag *tag)
@@ -88,7 +88,7 @@ void PrintId3Tag(Id3Tag tag)
     puts("");
     puts("***** GENERAL INFORMATION *****");
     printf("Version:\t\t %d\n", tag.version);
-    printf("Tag Size:\t\t %d\n", tag.headerSize);
+    printf("Tag Size:\t\t %d\n", tag.size);
     printf("Extended Header Size:\t %d\n", tag.extendedHeaderSize);
     puts("");
     puts("***** HEADER FLAGS *****");

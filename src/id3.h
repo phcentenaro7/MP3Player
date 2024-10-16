@@ -56,7 +56,7 @@ typedef struct Id3Tag
 {
     int16_t version;
     int8_t flags;
-    int32_t headerSize;
+    int32_t size;
     int32_t extendedHeaderSize;
     int8_t numberOfFlagBytes;
     int8_t extendedFlags;
