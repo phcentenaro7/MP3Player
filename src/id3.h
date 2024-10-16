@@ -2,6 +2,7 @@
 #define ID3_H
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 
 typedef enum Id3Flag
@@ -19,6 +20,38 @@ typedef enum Id3ExtendedFlag
     ID3_XFLAG_TAG_RESTRICTIONS = 16
 }Id3ExtendedFlag;
 
+typedef enum Id3TagSizeRestrictions
+{
+    ID3_TAG_128_FRAMES_1_MB_MAX_SIZE = 0,
+    ID3_TAG_64_FRAMES_128_KB_MAX_SIZE = 64,
+    ID3_TAG_32_FRAMES_40_KB_MAX_SIZE = 128,
+    ID3_TAG_32_FRAMES_4_KB_MAX_SIZE = 192
+}Id3TagSizeRestrictions;
+
+typedef enum Id3EncodingRestrictions
+{
+    ID3_ENCODING_ANY = 0,
+    ID3_ENCODING_SPECIFIC = 32,
+}Id3EncodingRestrictions;
+
+typedef enum Id3StringRestrictions
+{
+    ID3_STRING_MAX_INF = 0,
+    ID3_STRING_MAX_1024 = 8,
+    ID3_STRING_MAX_128 = 16,
+    ID3_STRING_MAX_30 = 24
+}Id3StringRestrictions;
+
+typedef enum Id3ImageRestrictions
+{
+    ID3_IMAGE_ENCODING_ANY = 0,
+    ID3_IMAGE_ENCODING_SPECIFIC = 4,
+    ID3_IMAGE_SIZE_MAX_INF = 0,
+    ID3_IMAGE_SIZE_MAX_256 = 1,
+    ID3_IMAGE_SIZE_MAX_64 = 2,
+    ID3_IMAGE_SIZE_EXACTLY_64 = 3
+}Id3ImageRestrictions;
+
 typedef struct Id3Tag
 {
     int16_t version;
@@ -27,6 +60,8 @@ typedef struct Id3Tag
     int32_t extendedHeaderSize;
     int8_t numberOfFlagBytes;
     int8_t extendedFlags;
+    int64_t totalFrameCrc;
+    int8_t restrictions;
 }Id3Tag;
 
 // Returns true if `mp3File` contains an ID3 tag.

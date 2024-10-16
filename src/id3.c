@@ -1,5 +1,4 @@
 #include "id3.h"
-#include <stdio.h>
 
 bool IsId3TagPresent(FILE *mp3File)
 {
@@ -33,29 +32,53 @@ int64_t DecodeSynchsafe(int64_t value)
              | ((value & 0xff00000000000000) >> 7);
 }
 
-bool LoadId3Tag(FILE *mp3File, Id3Tag *tag)
+void LoadId3Header(FILE *mp3File, Id3Tag *tag)
 {
-    if(!IsId3TagPresent(mp3File))
-    {
-        return false;
-    }
     fread(&(tag->version), sizeof(int16_t), 1, mp3File);
     fread(&(tag->flags), sizeof(int8_t), 1, mp3File);
     fread(&(tag->headerSize), sizeof(int32_t), 1, mp3File);
     tag->headerSize = (int32_t)DecodeSynchsafe(SwitchEndianness(tag->headerSize) >> 32);
-    if(tag->flags & ID3_FLAG_EXTENDED_HEADER)
+}
+
+void LoadId3ExtendedHeader(FILE *mp3File, Id3Tag *tag)
+{
+    if(!(tag->flags & ID3_FLAG_EXTENDED_HEADER))
+    {
+        return;
+    }
+    else
     {
         fread(&(tag->extendedHeaderSize), sizeof(int32_t), 1, mp3File);
         tag->extendedHeaderSize = (int32_t)DecodeSynchsafe(SwitchEndianness(tag->extendedHeaderSize) >> 32);
         fread(&(tag->numberOfFlagBytes), sizeof(int8_t), 1, mp3File);
         fread(&(tag->extendedFlags), sizeof(int8_t), 1, mp3File);
     }
-    else
+    if(tag->extendedFlags & ID3_XFLAG_TAG_IS_AN_UPDATE)
     {
-        tag->extendedHeaderSize = 0;
-        tag->numberOfFlagBytes = 0;
-        tag->extendedFlags = 0;
+        fread(NULL, sizeof(int8_t), 1, mp3File);
     }
+    if(tag->extendedFlags & ID3_XFLAG_CRC_DATA_PRESENT)
+    {
+        fread(NULL, sizeof(int8_t), 1, mp3File);
+        fread(&(tag->totalFrameCrc), sizeof(int64_t), 1, mp3File);
+        tag->totalFrameCrc = DecodeSynchsafe(SwitchEndianness(tag->totalFrameCrc) >> 24);
+    }
+    if(tag->extendedFlags & ID3_XFLAG_TAG_RESTRICTIONS)
+    {
+        fread(NULL, sizeof(int8_t), 1, mp3File);
+        fread(&(tag->restrictions), sizeof(int8_t), 1, mp3File);
+    }
+}
+
+bool LoadId3Tag(FILE *mp3File, Id3Tag *tag)
+{
+    memset(tag, 0, sizeof(Id3Tag));
+    if(!IsId3TagPresent(mp3File))
+    {
+        return false;
+    }
+    LoadId3Header(mp3File, tag);
+    LoadId3ExtendedHeader(mp3File, tag);
     return true;
 }
 
