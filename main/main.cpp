@@ -35,13 +35,10 @@ extern "C" void app_main()
 	{
 		printf("File %s has ID3 tag\n", file.name());
 		PlayerID3::ID3Header header = PlayerID3::ID3Header(file);
-		printf("major version: %d\n", header.major_version);
-		printf("revision number: %d\n", header.revision_number);
-		printf("flags: %d\n", header.flags);
-		printf("size: %ld\n", header.size);
-		PlayerMisc::SwitchEndianness(header.size);
-		PlayerMisc::UndoSynchsafe(header.size);
-		printf("switched size: %ld\n", header.size);
+		printf("major version: %d\n", header.getMajorVersion());
+		printf("revision number: %d\n", header.getRevisionNumber());
+		printf("flags: %d\n", header.getFlags());
+		printf("size: %ld\n", header.getTagSize());
 	}
 	file.close();
 }

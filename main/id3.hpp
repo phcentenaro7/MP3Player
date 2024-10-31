@@ -2,20 +2,25 @@
 #define ID3_HPP
 #include <SD.h>
 #include <FS.h>
+#include "esp_log.h"
+#include "misc.hpp"
 
 namespace PlayerID3
 {
     bool FileHasID3Tag(File file);
     class ID3Header
     {
-        protected:
-            
-        public:
+        private:
             uint8_t major_version;
             uint8_t revision_number;
             uint8_t flags;
-            uint32_t size;
+            uint32_t tag_size;
+        public:
             ID3Header(File file);
+            inline uint8_t getMajorVersion() {return major_version;};
+            inline uint8_t getRevisionNumber() {return revision_number;};
+            inline uint8_t getFlags() {return flags;};
+            inline uint32_t getTagSize() {return tag_size;};
     };
     const uint8_t FLAG_UNSYNCHRONIZATION = 0x80;
     const uint8_t FLAG_EXTENDED_HEADER = 0x40;
@@ -24,7 +29,7 @@ namespace PlayerID3
     class ID3ExtendedHeader
     {
         protected:
-            uint32_t size;
+            uint32_t extended_header_size;
             uint8_t flags;
             uint64_t CRC;
             uint8_t restrictions;
