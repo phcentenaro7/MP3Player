@@ -13,21 +13,13 @@ namespace PlayerID3
         private:
             uint8_t major_version;
             uint8_t revision_number;
-<<<<<<< HEAD
-            uint8_t flags;
-=======
             uint8_t header_flags;
->>>>>>> a409578 (Files moved to new PC)
             uint32_t tag_size;
         public:
             ID3Header(File file);
             inline uint8_t getMajorVersion() {return major_version;};
             inline uint8_t getRevisionNumber() {return revision_number;};
-<<<<<<< HEAD
-            inline uint8_t getFlags() {return flags;};
-=======
             inline uint8_t getHeaderFlags() {return flags;};
->>>>>>> a409578 (Files moved to new PC)
             inline uint32_t getTagSize() {return tag_size;};
     };
     const uint8_t FLAG_UNSYNCHRONIZATION = 0x80;
@@ -38,22 +30,15 @@ namespace PlayerID3
     {
         protected:
             uint32_t extended_header_size;
-<<<<<<< HEAD
-            uint8_t flags;
-=======
             uint8_t extended_header_flags;
->>>>>>> a409578 (Files moved to new PC)
             uint64_t CRC;
             uint8_t restrictions;
         public:
             ID3ExtendedHeader(File file);
-<<<<<<< HEAD
-=======
             inline uint32_t getExtendedHeaderSize() {return extended_header_size;};
             inline uint8_t getExtendedHeaderFlags() {return extended_header_flags;};
             inline uint64_t getCRC() {return CRC;};
             inline getRestrictions() {return restrictions;};
->>>>>>> a409578 (Files moved to new PC)
     };
     const uint8_t FLAG_TAG_IS_UPDATE = 0x40;
     const uint8_t FLAG_CRC_PRESENT = 0x20;
