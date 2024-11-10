@@ -12,7 +12,6 @@ namespace PlayerSD
             ESP_LOGE(TAG, "SD card initialization failed");
             return false;
         }
-        ESP_LOGI(TAG, "SD card initialization successful");
         return true;
     }
 
