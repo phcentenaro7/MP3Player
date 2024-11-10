@@ -19,4 +19,15 @@ namespace PlayerMisc
         }
         return true;
     }
+
+    void TrimLeftNUL(uint8_t* string, size_t stringLength)
+    {
+        size_t shiftLength = 0;
+        for(size_t i = 0; string[i] == '\0' && i < stringLength; i++, shiftLength++);
+        if(shiftLength > 0)
+        {
+            memmove(string, string + shiftLength, stringLength - shiftLength);
+            string[stringLength - shiftLength] = '\0';
+        }
+    }
 }
