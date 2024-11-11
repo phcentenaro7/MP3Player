@@ -20,7 +20,7 @@ namespace PlayerMisc
         return true;
     }
 
-    void TrimLeftNUL(uint8_t* string, size_t stringLength)
+    void TrimLeftNUL(char* string, size_t stringLength)
     {
         size_t shiftLength = 0;
         for(size_t i = 0; string[i] == '\0' && i < stringLength; i++, shiftLength++);

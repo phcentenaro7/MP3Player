@@ -8,7 +8,7 @@ namespace PlayerID3
     {
         uint8_t SOF[4] = {0};
         file.read(SOF, 3 * sizeof(int8_t));
-        return !strcmp((const char*)SOF, "ID3");
+        return !strcmp(SOF, "ID3");
     }
 
     void ID3Header::Load(File file)
@@ -75,7 +75,7 @@ namespace PlayerID3
         if(this->flags & FLAG_TAG_RESTRICTIONS) printf("Tag contains additional restrictions (sum %x).\n", this->restrictions);
     }
 
-    ID3Frame::ID3Frame(uint8_t* key, uint8_t* value)
+    ID3Frame::ID3Frame(char* key, char* value)
     {
         this->key = key;
         this->value = value;
@@ -94,7 +94,7 @@ namespace PlayerID3
         delete this->value;
     }
 
-    void ID3FrameList::AddFrame(uint8_t* key, uint8_t* value)
+    void ID3FrameList::AddFrame(char* key, char* value)
     {
         size_t framesRemaining = this->count;
         if(framesRemaining == 0)
@@ -112,23 +112,23 @@ namespace PlayerID3
         count++;
     }
 
-    bool ID3FrameList::DoesFrameExist(uint8_t* key)
+    bool ID3FrameList::DoesFrameExist(char* key)
     {
         ID3Frame* currentFrame = this->base;
         while(currentFrame != NULL)
         {
-            if(!strcmp((const char*)currentFrame->key, (const char*)key)) return true;
+            if(!strcmp(currentFrame->key, key)) return true;
             currentFrame = currentFrame->next;
         }
         return false;
     }
 
-    uint8_t* ID3FrameList::GetFrameValue(uint8_t* key)
+    char* ID3FrameList::GetFrameValue(char* key)
     {
         ID3Frame* currentFrame = this->base;
         while(currentFrame != NULL)
         {
-            if(!strcmp((const char*)currentFrame->key, (const char*)key)) return currentFrame->value;
+            if(!strcmp(currentFrame->key, key)) return currentFrame->value;
             currentFrame = currentFrame->next;
         }
         return NULL;
@@ -159,15 +159,15 @@ namespace PlayerID3
         size_t remainingTagLength = this->GetTagSize() - this->GetExtendedHeaderSize();
         while(remainingTagLength >= 10)
         {
-            uint8_t* key = new uint8_t[5]();
-            file.read(key, 4 * sizeof(uint8_t));
-            if(!strcmp((const char*)key, "")) break;
+            char* key = new char[5]();
+            file.readBytes(key, 4 * sizeof(char));
+            if(!strcmp(key, "")) break;
             uint32_t value_size;
             file.read((uint8_t*)&(value_size), sizeof(uint32_t));
             PlayerMisc::SwitchEndiannessAndUndoSynchsafe(value_size);
             file.seek(2 * sizeof(uint8_t), fs::SeekCur);
-            uint8_t* value = new uint8_t[value_size];
-            file.read(value, value_size * sizeof(uint8_t));
+            char* value = new char[value_size]();
+            file.readBytes(value, value_size * sizeof(char));
             PlayerMisc::TrimLeftNUL(value, value_size);
             this->AddFrame(key, value);
             remainingTagLength -= 14 + value_size;

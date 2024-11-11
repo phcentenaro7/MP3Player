@@ -7,7 +7,7 @@ namespace PlayerMisc
 {
     bool StringEndsWith(const char* string, const char* end);
 
-    void TrimLeftNUL(uint8_t* string, size_t stringLength);
+    void TrimLeftNUL(char* string, size_t stringLength);
 
     inline void SwitchEndianness(uint16_t& bytes)
     {

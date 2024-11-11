@@ -55,10 +55,10 @@ namespace PlayerID3
 
     struct ID3Frame
     {
-        uint8_t* key;
-        uint8_t* value;
+        char* key;
+        char* value;
         ID3Frame* next;
-        ID3Frame(uint8_t* key, uint8_t* value);
+        ID3Frame(char* key, char* value);
         void Print();
         ~ID3Frame();
     };
@@ -71,9 +71,9 @@ namespace PlayerID3
         public:
             ID3FrameList() : base(NULL), count(0){};
             inline size_t GetFrameCount() {return count;};
-            void AddFrame(uint8_t* key, uint8_t* value);
-            bool DoesFrameExist(uint8_t* key);
-            uint8_t* GetFrameValue(uint8_t* key);
+            void AddFrame(char* key, char* value);
+            bool DoesFrameExist(char* key);
+            char* GetFrameValue(char* key);
             void Print();
     };
 
