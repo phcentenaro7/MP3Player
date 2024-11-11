@@ -6,8 +6,8 @@ namespace PlayerID3
 {
     bool FileHasID3Tag(File file)
     {
-        uint8_t SOF[4] = {0};
-        file.read(SOF, 3 * sizeof(int8_t));
+        char SOF[4] = {0};
+        file.readBytes(SOF, 3 * sizeof(char));
         return !strcmp(SOF, "ID3");
     }
 
