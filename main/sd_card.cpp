@@ -95,4 +95,50 @@ namespace PlayerSD
             }
         }
     }
+
+    bool FileSystemStructure::IsFileValid(File file)
+    {
+        char* name = (char*)file.name();
+        if(strlen(name) != 7 || !PlayerMisc::StringEndsWith(name, ".MP3")) return false;
+        bool nonZero = false;
+        for(size_t i = 0; i < 3; i++)
+        {
+            if(!isdigit(name[i])) return false;
+            if(name[i] > '0') nonZero = true;
+        }
+        return nonZero;
+    }
+
+    bool FileSystemStructure::IsFolderValid(File folder)
+    {
+        char* name = (char*)folder.name();
+        if(strlen(name) != 2) return false;
+        return (isdigit(name[0]) && isdigit(name[1]) && (name[0] > '0' || name[1] > '0'));
+    }
+
+    uint8_t FileSystemStructure::CountValidFiles(uint8_t folderNumber)
+    {
+        //Implementation needed
+        return 0;
+    }
+
+    uint8_t FileSystemStructure::CountValidFolders()
+    {
+        //Implementation needed
+        return 0;
+    }
+
+    void FileSystemStructure::LoadFolders()
+    {
+        //Implementation needed
+    }
+
+    FileSystemStructure::FileSystemStructure()
+    {
+        this->selected_folder = 1;
+        for(uint8_t i = 0; i < 99; i++)
+        {
+            this->folders[i] = NULL;
+        }
+    }
 }
