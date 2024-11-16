@@ -144,6 +144,18 @@ namespace PlayerID3
         }
     }
 
+    ID3FrameList::~ID3FrameList()
+    {
+        PlayerID3::ID3Frame* currentFrame = this->base;
+        PlayerID3::ID3Frame* nextFrame = NULL;
+        while(currentFrame)
+        {
+            nextFrame = currentFrame->next;
+            delete currentFrame;
+            currentFrame = nextFrame;
+        }
+    }
+
     ID3Tag::ID3Tag(File file)
     {
         ESP_LOGI(TAG, "Loading ID3 tag from file %s", file.name());
@@ -172,6 +184,7 @@ namespace PlayerID3
             this->AddFrame(key, value);
             remainingTagLength -= 14 + value_size;
         }
+        this->next = NULL;
         return;
     }
 

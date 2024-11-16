@@ -75,12 +75,14 @@ namespace PlayerID3
             bool DoesFrameExist(char* key);
             char* GetFrameValue(char* key);
             void Print();
+            ~ID3FrameList();
     };
 
     class ID3Tag : public ID3Header, public ID3ExtendedHeader, public ID3FrameList
     {
         public:
             ID3Tag(File file);
+            ID3Tag* next;
             void Print();
     };
 }
