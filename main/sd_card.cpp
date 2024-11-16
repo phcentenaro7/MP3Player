@@ -96,7 +96,26 @@ namespace PlayerSD
         }
     }
 
-    bool FileSystemStructure::IsFileValid(File file)
+    FolderManager::FolderManager(uint8_t folderNumber) : FolderManager()
+    {
+        if (folderNumber > 99) return;
+        char folderName[4] = "";
+        sprintf(folderName, "/%01d", folderNumber);
+        if(!SD.exists(folderName)) return;
+        File folder = SD.open(folderName);
+        File file = folder.openNextFile();
+        while(this->count < 255 && file)
+        {
+            if(!file.isDirectory() && IsFileValid(file))
+            {
+                AddFile(file);
+            }
+            file.close();
+            file = folder.openNextFile();
+        }
+    }
+
+    bool FolderManager::IsFileValid(File file)
     {
         char* name = (char*)file.name();
         if(strlen(name) != 7 || !PlayerMisc::StringEndsWith(name, ".MP3")) return false;
@@ -109,36 +128,54 @@ namespace PlayerSD
         return nonZero;
     }
 
-    bool FileSystemStructure::IsFolderValid(File folder)
+    void FolderManager::AddFile(File file)
     {
-        char* name = (char*)folder.name();
-        if(strlen(name) != 2) return false;
-        return (isdigit(name[0]) && isdigit(name[1]) && (name[0] > '0' || name[1] > '0'));
-    }
-
-    uint8_t FileSystemStructure::CountValidFiles(uint8_t folderNumber)
-    {
-        //Implementation needed
-        return 0;
-    }
-
-    uint8_t FileSystemStructure::CountValidFolders()
-    {
-        //Implementation needed
-        return 0;
-    }
-
-    void FileSystemStructure::LoadFolders()
-    {
-        //Implementation needed
-    }
-
-    FileSystemStructure::FileSystemStructure()
-    {
-        this->selected_folder = 1;
-        for(uint8_t i = 0; i < 99; i++)
+        if(this->count == 0)
         {
-            this->folders[i] = NULL;
+            this->base = new PlayerID3::ID3Tag(file);
+            this->count++;
+            return;
+        }
+        PlayerID3::ID3Tag* tag = base;
+        while(tag->next)
+        {
+            tag = tag->next;
+        }
+        tag->next = new PlayerID3::ID3Tag(file);
+        this->count++;
+    }
+
+    PlayerID3::ID3Tag FolderManager::operator[](uint8_t index)
+    {
+        PlayerID3::ID3Tag* tag = this->base;
+        while(index > 0)
+        {
+            tag = tag->next;
+            index--;
+        }
+        return *tag;
+    }
+
+    FolderManager::~FolderManager()
+    {
+        PlayerID3::ID3Tag* currentFile = this->base;
+        PlayerID3::ID3Tag* nextFile = NULL;
+        while(currentFile)
+        {
+            nextFile = currentFile->next;
+            delete currentFile;
+            currentFile = nextFile;
+        }
+    }
+
+    FileSystemManager::FileSystemManager()
+    {
+        char path[4] = "";
+        for(uint8_t i = 1; i <= 99; i++)
+        {
+            sprintf(path, "/%01d", i);
+            if(SD.exists(path)) this->folders[i] = FolderManager(i);
+            else this->folders[i] = FolderManager();
         }
     }
 }

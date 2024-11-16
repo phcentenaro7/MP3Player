@@ -15,18 +15,28 @@ namespace PlayerSD
     void ListFiles(File& directory);
     void ListDirectories(File& directory);
     void ShowFileTree(File& root, uint8_t level = 0);
-    class FileSystemStructure
+    class FolderManager
     {
         private:
-            uint8_t selected_folder;
-            PlayerID3::ID3Tag* folders[99];
-            bool IsFolderValid(File folder);
+            PlayerID3::ID3Tag* base;
+            uint8_t count;
             bool IsFileValid(File file);
-            uint8_t CountValidFolders();
-            uint8_t CountValidFiles(uint8_t folderNumber);
-            void LoadFolders();
+            void AddFile(File file);
+            PlayerID3::ID3Tag operator[](uint8_t index);
         public:
-            FileSystemStructure();
+            FolderManager() : base(NULL), count(0){};
+            FolderManager(uint8_t folderNumber);
+            inline uint8_t GetFileCount() {return count;};
+            ~FolderManager();
+    };
+    class FileSystemManager
+    {
+        private:
+            char* root;
+            uint8_t selected_folder;
+            FolderManager folders[99];
+        public:
+            FileSystemManager();
     };
 }
 
