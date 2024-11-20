@@ -15,12 +15,10 @@ extern "C" void app_main()
 {
 	ESP_LOGI(TAG, "Starting MP3Player");
 	initArduino();
-  	Serial.begin(9600);
+  	Serial.begin(115200);
 	while (!Serial) { }
 
 	PlayerSD::Initialize();
-	File f = SD.open("/001.MP3");
-	PlayerID3::ID3Tag tag = PlayerID3::ID3Tag(f);
-	tag.Print();
-	f.close();
+	PlayerSD::FileSystemManager manager = PlayerSD::FileSystemManager();
+	manager[0][2].Print();
 }

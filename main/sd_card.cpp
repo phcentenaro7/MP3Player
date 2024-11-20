@@ -1,6 +1,6 @@
 #include "sd_card.hpp"
 
-static const char* TAG = "sd_card";
+static const char* TAG = "SD";
 
 namespace PlayerSD
 {
@@ -96,11 +96,13 @@ namespace PlayerSD
         }
     }
 
-    FolderManager::FolderManager(uint8_t folderNumber) : FolderManager()
+    void FolderManager::Load(uint8_t folderNumber)
     {
         if (folderNumber > 99) return;
+        this->count = 0;
+        this->base = NULL;
         char folderName[4] = "";
-        sprintf(folderName, "/%01d", folderNumber);
+        sprintf(folderName, "/%02d", folderNumber);
         if(!SD.exists(folderName)) return;
         File folder = SD.open(folderName);
         File file = folder.openNextFile();
@@ -108,6 +110,7 @@ namespace PlayerSD
         {
             if(!file.isDirectory() && IsFileValid(file))
             {
+                ESP_LOGI(TAG, "Folder %02d has file %s", folderNumber, file.name());
                 AddFile(file);
             }
             file.close();
@@ -145,7 +148,7 @@ namespace PlayerSD
         this->count++;
     }
 
-    PlayerID3::ID3Tag FolderManager::operator[](uint8_t index)
+    PlayerID3::ID3Tag FolderManager::GetFile(uint8_t index)
     {
         PlayerID3::ID3Tag* tag = this->base;
         while(index > 0)
@@ -171,11 +174,28 @@ namespace PlayerSD
     FileSystemManager::FileSystemManager()
     {
         char path[4] = "";
-        for(uint8_t i = 1; i <= 99; i++)
+        for(uint8_t i = 0; i < 99; i++)
         {
-            sprintf(path, "/%01d", i);
-            if(SD.exists(path)) this->folders[i] = FolderManager(i);
-            else this->folders[i] = FolderManager();
+            ESP_LOGI(TAG, "Loading folder %02d", i + 1);
+            sprintf(path, "/%02d", i);
+            this->folders[i].Load(i + 1);
+        }
+    }
+
+    FolderManager FileSystemManager::GetFolder(uint8_t index)
+    {
+        return this->folders[index];
+    }
+
+    void FileSystemManager::Print()
+    {
+        puts("File System Manager Count");
+        for(uint8_t i = 0; i < 99; i++)
+        {
+            if(this->folders[i].GetFileCount() > 0)
+            {
+                printf("Folder %02d: %d files.\n", i + 1, this->folders[i].GetFileCount());
+            }
         }
     }
 }
