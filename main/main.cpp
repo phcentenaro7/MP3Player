@@ -20,5 +20,7 @@ extern "C" void app_main()
 
 	PlayerSD::Initialize();
 	PlayerSD::FileSystemManager manager = PlayerSD::FileSystemManager();
-	manager[0][2].Print();
+	manager[0].Print();
+	manager[1].Print();
+	manager[2].Print();
 }
