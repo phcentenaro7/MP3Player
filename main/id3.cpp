@@ -65,6 +65,7 @@ namespace PlayerID3
 
     void ID3ExtendedHeader::Print()
     {
+        if(this->size == 0) return;
         printf("Extended header size: %lu\n", this->size);
         if(this->flags == 0)
         {
@@ -75,10 +76,10 @@ namespace PlayerID3
         if(this->flags & FLAG_TAG_RESTRICTIONS) printf("Tag contains additional restrictions (sum %x).\n", this->restrictions);
     }
 
-    ID3Frame::ID3Frame(char* key, char* value)
+    ID3Frame::ID3Frame(const char* key, const char* value)
     {
-        this->key = key;
-        this->value = value;
+        this->key = (char*)key;
+        this->value = (char*)value;
         this->next = NULL;
     }
 
@@ -94,7 +95,7 @@ namespace PlayerID3
         delete this->value;
     }
 
-    void ID3FrameList::AddFrame(char* key, char* value)
+    void ID3FrameList::AddFrame(const char* key, const char* value)
     {
         size_t framesRemaining = this->count;
         if(framesRemaining == 0)
@@ -112,7 +113,7 @@ namespace PlayerID3
         count++;
     }
 
-    bool ID3FrameList::DoesFrameExist(char* key)
+    bool ID3FrameList::DoesFrameExist(const char* key)
     {
         ID3Frame* currentFrame = this->base;
         while(currentFrame != NULL)
@@ -123,7 +124,7 @@ namespace PlayerID3
         return false;
     }
 
-    char* ID3FrameList::GetFrameValue(char* key)
+    char* ID3FrameList::GetFrameValue(const char* key)
     {
         ID3Frame* currentFrame = this->base;
         while(currentFrame != NULL)
