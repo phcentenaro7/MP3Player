@@ -99,6 +99,7 @@ namespace PlayerSD
     void FolderManager::Load(uint8_t folderNumber)
     {
         if (folderNumber > 99) return;
+        this->number = folderNumber;
         this->count = 0;
         this->base = NULL;
         char folderName[4] = "";
@@ -148,7 +149,7 @@ namespace PlayerSD
         this->count++;
     }
 
-    PlayerID3::ID3Tag FolderManager::GetFile(uint8_t index)
+    PlayerID3::ID3Tag& FolderManager::GetFile(uint8_t index)
     {
         PlayerID3::ID3Tag* tag = this->base;
         while(index > 0)
@@ -159,8 +160,27 @@ namespace PlayerSD
         return *tag;
     }
 
+    void FolderManager::Print()
+    {
+        PlayerID3::ID3Tag* tag = this->base;
+        char* name;
+        uint8_t i = 1;
+        while(tag)
+        {
+            printf("File %d: ", i);
+            if((name = tag->GetFrameValue("TIT2"))) printf("%s\n", name);
+            else puts("");
+            tag = tag->next;
+            i++;
+        }
+    }
+
+    int fcount = 0;
+
     FolderManager::~FolderManager()
     {
+        if(fcount > 99) return;
+        ESP_LOGI(TAG, "Deleting folder %02d", number);
         PlayerID3::ID3Tag* currentFile = this->base;
         PlayerID3::ID3Tag* nextFile = NULL;
         while(currentFile)
@@ -177,12 +197,12 @@ namespace PlayerSD
         for(uint8_t i = 0; i < 99; i++)
         {
             ESP_LOGI(TAG, "Loading folder %02d", i + 1);
-            sprintf(path, "/%02d", i);
+            sprintf(path, "/%02d", i + 1);
             this->folders[i].Load(i + 1);
         }
     }
 
-    FolderManager FileSystemManager::GetFolder(uint8_t index)
+    FolderManager& FileSystemManager::GetFolder(uint8_t index)
     {
         return this->folders[index];
     }

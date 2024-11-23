@@ -18,16 +18,18 @@ namespace PlayerSD
     class FolderManager
     {
         private:
+            uint8_t number;
             PlayerID3::ID3Tag* base;
             uint8_t count;
             bool IsFileValid(File file);
             void AddFile(File file);
         public:
-            FolderManager() : base(NULL), count(0){};
+            FolderManager() : number(0), base(NULL), count(0){};
             void Load(uint8_t folderNumber);
             inline uint8_t GetFileCount() {return count;};
-            PlayerID3::ID3Tag GetFile(uint8_t index);
-            inline PlayerID3::ID3Tag operator[](uint8_t index) {return GetFile(index);};
+            PlayerID3::ID3Tag& GetFile(uint8_t index);
+            inline PlayerID3::ID3Tag& operator[](uint8_t index) {return GetFile(index);};
+            void Print();
             ~FolderManager();
     };
     class FileSystemManager
@@ -38,8 +40,8 @@ namespace PlayerSD
             FolderManager folders[99];
         public:
             FileSystemManager();
-            FolderManager GetFolder(uint8_t index);
-            inline FolderManager operator[](uint8_t index) {return GetFolder(index);};
+            FolderManager& GetFolder(uint8_t index);
+            inline FolderManager& operator[](uint8_t index) {return GetFolder(index);};
             void Print();
     };
 }
