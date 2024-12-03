@@ -6,6 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "sd_card.hpp"
 #include "id3.hpp"
+#include "HD44780.h"
 #include "esp_log.h"
 #include "misc.hpp"
 
@@ -18,9 +19,15 @@ extern "C" void app_main()
   	Serial.begin(115200);
 	while (!Serial) { }
 
-	PlayerSD::Initialize();
-	PlayerSD::FileSystemManager manager = PlayerSD::FileSystemManager();
-	manager[0].Print();
-	manager[1].Print();
-	manager[2].Print();
+	LCD_init(0x27, PlayerPins::I2C_SDA, PlayerPins::I2C_SCL, 16, 2);
+	LCD_clearScreen();
+	while(true)
+	{
+		LCD_setDisplayOn();
+		LCD_setCursor(0, 0);
+		LCD_writeStr("Que coisa boa");
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
+		LCD_setDisplayOff();
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
+	}
 }
