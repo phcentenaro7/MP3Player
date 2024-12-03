@@ -1,2 +1,4 @@
-idf_component_register(SRCS "id3.cpp" "misc.cpp" "sd_card.cpp" "main.cpp"
+idf_component_register(
+		    REQUIRES HD44780 arduino driver DFRobotDFPlayerMini
+		    SRCS "id3.cpp" "misc.cpp" "sd_card.cpp" "main.cpp" "lcd.cpp"
                     INCLUDE_DIRS ".")
