@@ -7,6 +7,7 @@
 #include "sd_card.hpp"
 #include "id3.hpp"
 #include "HD44780.h"
+#include "lcd.hpp"
 #include "esp_log.h"
 #include "misc.hpp"
 
@@ -21,25 +22,20 @@ extern "C" void app_main()
 
 	LCD_init(0x27, PlayerPins::I2C_SDA, PlayerPins::I2C_SCL, 16, 2);
 	LCD_clearScreen();
-	char folderUp[8] = 
+	LCD_setDisplayOn();
+	for(int i = 0; i < 8; i++)
 	{
-		0b00100,
-		0b01010,
-		0b01010,
-		0b10001,
-		0b10001,
-		0b00000,
-		0b00000,
-		0b00000
-	};
-	LCD_writeToCGRAM(0, folderUp);
+		LCD_writeToCGRAM(i << 3, PlayerLCD::specialChars[i]);
+		LCD_writeChar(i);
+	}
 	while(true)
 	{
-		LCD_setDisplayOn();
-		LCD_setCursor(0, 0);
-		LCD_writeChar(0);
-		vTaskDelay(2000 / portTICK_PERIOD_MS);
-		LCD_setDisplayOff();
-		vTaskDelay(2000 / portTICK_PERIOD_MS);
+		LCD_setCursor(0, 1);
+		for(int i = 0; i < 5; i++)
+		{
+			LCD_writeChar(i);
+			LCD_writeChar(' ');
+		}
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
