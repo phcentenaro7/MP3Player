@@ -18,6 +18,7 @@
 #define LCD_COMMAND             0x00
 #define LCD_WRITE               0x01
 
+#define LCD_SET_CGRAM_ADDR      0x40
 #define LCD_SET_DDRAM_ADDR      0x80
 #define LCD_READ_BF             0x40
 
@@ -112,16 +113,6 @@ void LCD_setCursor(uint8_t col, uint8_t row)
     LCD_writeByte(LCD_SET_DDRAM_ADDR | (col + row_offsets[row]), LCD_COMMAND);
 }
 
-void LCD_setDisplayOff()
-{
-    LCD_writeByte(LCD_DISPLAY_OFF, LCD_COMMAND);
-}
-
-void LCD_setDisplayOn()
-{
-    LCD_writeByte(LCD_DISPLAY_ON, LCD_COMMAND);
-}
-
 void LCD_writeChar(char c)
 {
     LCD_writeByte(c, LCD_WRITE);                                        // Write data to DDRAM
@@ -156,7 +147,6 @@ static void LCD_writeNibble(uint8_t nibble, uint8_t mode)
     ESP_ERROR_CHECK(i2c_master_stop(cmd));
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS));
     i2c_cmd_link_delete(cmd);   
-
     LCD_pulseEnable(data);                                              // Clock data into LCD
 }
 
@@ -185,4 +175,23 @@ static void LCD_pulseEnable(uint8_t data)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS));
     i2c_cmd_link_delete(cmd);
     ets_delay_us(500);
+}
+
+//Custom functions
+
+void LCD_setDisplayOff()
+{
+    LCD_writeByte(LCD_DISPLAY_OFF, LCD_COMMAND);
+}
+
+void LCD_setDisplayOn()
+{
+    LCD_writeByte(LCD_DISPLAY_ON, LCD_COMMAND);
+}
+
+void LCD_writeToCGRAM(uint8_t address, char* pattern)
+{
+    uint8_t command = LCD_SET_CGRAM_ADDR | (address & 0x3F);
+    LCD_writeByte(command, LCD_COMMAND);
+    for(uint8_t i = 0; i < 8; i++) LCD_writeByte(pattern[i], LCD_WRITE);
 }

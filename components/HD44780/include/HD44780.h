@@ -8,6 +8,8 @@ extern "C"
     void LCD_clearScreen(void);
     void LCD_writeChar(char c);
     void LCD_writeStr(char* str); 
+    //Custom functions
     void LCD_setDisplayOn();
     void LCD_setDisplayOff();
+    void LCD_writeToCGRAM(uint8_t address, char* pattern);
 }
