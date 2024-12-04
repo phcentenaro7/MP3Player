@@ -2,6 +2,9 @@
 
 namespace PlayerLCD
 {
+    const uint8_t LCD_ADDRESS = 0x27;
+    const uint8_t NUM_COLUMNS = 16;
+    const uint8_t NUM_ROWS = 2;
     const uint8_t CHAR_FOLDER_INC = 0;
     const uint8_t CHAR_FOLDER_DEC = 1;
     const uint8_t CHAR_TRACK_INC = 2;
