@@ -3,6 +3,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <stdio.h>
+#include <string.h>
 #include "sdkconfig.h"
 #include "rom/ets_sys.h"
 #include <esp_log.h>
@@ -118,7 +119,7 @@ void LCD_writeChar(char c)
     LCD_writeByte(c, LCD_WRITE);                                        // Write data to DDRAM
 }
 
-void LCD_writeStr(char* str)
+void LCD_writeStr(const char* str)
 {
     while (*str) {
         LCD_writeChar(*str++);
@@ -189,9 +190,16 @@ void LCD_setDisplayOn()
     LCD_writeByte(LCD_DISPLAY_ON, LCD_COMMAND);
 }
 
-void LCD_writeToCGRAM(uint8_t address, char* pattern)
+void LCD_writeToCGRAM(uint8_t address, const char* pattern)
 {
     uint8_t command = LCD_SET_CGRAM_ADDR | (address & 0x3F);
     LCD_writeByte(command, LCD_COMMAND);
     for(uint8_t i = 0; i < 8; i++) LCD_writeByte(pattern[i], LCD_WRITE);
+}
+
+void LCD_writeCentered(const char* str, uint8_t row)
+{
+    size_t length = strlen(str);
+    LCD_setCursor((LCD_cols - length)/ 2, row);
+    LCD_writeStr(str);
 }
