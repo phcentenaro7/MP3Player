@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "esp_log.h"
+#include "HD44780.h"
 #include "pins.hpp"
 #include "misc.hpp"
 #include "id3.hpp"
@@ -35,11 +36,11 @@ namespace PlayerSD
     class FileSystemManager
     {
         private:
-            char* root;
+            const char* root;
             uint8_t selected_folder;
             FolderManager folders[99];
         public:
-            FileSystemManager();
+            FileSystemManager() : root("/"), selected_folder(0){};
             FolderManager& GetFolder(uint8_t index);
             inline FolderManager& operator[](uint8_t index) {return GetFolder(index);};
             void Print();

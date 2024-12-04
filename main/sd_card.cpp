@@ -112,6 +112,9 @@ namespace PlayerSD
             if(!file.isDirectory() && IsFileValid(file))
             {
                 ESP_LOGI(TAG, "Folder %02d has file %s", folderNumber, file.name());
+                char loadedText[10];
+                sprintf(loadedText, "Folder %02d", folderNumber);
+                LCD_writeCentered(loadedText, 1);
                 AddFile(file);
             }
             file.close();
@@ -175,11 +178,8 @@ namespace PlayerSD
         }
     }
 
-    int fcount = 0;
-
     FolderManager::~FolderManager()
     {
-        if(fcount > 99) return;
         ESP_LOGI(TAG, "Deleting folder %02d", number);
         PlayerID3::ID3Tag* currentFile = this->base;
         PlayerID3::ID3Tag* nextFile = NULL;
