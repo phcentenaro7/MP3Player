@@ -96,7 +96,7 @@ namespace PlayerSD
         }
     }
 
-    void FolderManager::Load(uint8_t folderNumber)
+    void FolderManager::Load(uint8_t folderNumber, PlayerLCD::LCD* lcd)
     {
         if (folderNumber > 99) return;
         this->number = folderNumber;
@@ -111,10 +111,13 @@ namespace PlayerSD
         {
             if(!file.isDirectory() && IsFileValid(file))
             {
-                ESP_LOGI(TAG, "Folder %02d has file %s", folderNumber, file.name());
-                char loadedText[10];
-                sprintf(loadedText, "Folder %02d", folderNumber);
-                LCD_writeCentered(loadedText, 1);
+                ESP_LOGI(TAG, "Folder %02d has file %s", folderNumber, file.name());            
+                if(lcd)
+                {
+                    char loadedText[10];
+                    sprintf(loadedText, "Folder %02d", folderNumber);
+                    lcd->Write(NULL, loadedText);
+                }
                 AddFile(file);
             }
             file.close();
@@ -191,14 +194,16 @@ namespace PlayerSD
         }
     }
 
-    FileSystemManager::FileSystemManager()
+    FileSystemManager::FileSystemManager(PlayerLCD::LCD* lcd)
     {
+        root = "/";
+        selected_folder = 0;
         char path[4] = "";
         for(uint8_t i = 0; i < 99; i++)
         {
             ESP_LOGI(TAG, "Loading folder %02d", i + 1);
             sprintf(path, "/%02d", i + 1);
-            this->folders[i].Load(i + 1);
+            this->folders[i].Load(i + 1, lcd);
         }
     }
 

@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "esp_log.h"
 #include "HD44780.h"
+#include "lcd.hpp"
 #include "pins.hpp"
 #include "misc.hpp"
 #include "id3.hpp"
@@ -26,7 +27,7 @@ namespace PlayerSD
             void AddFile(File file);
         public:
             FolderManager() : number(0), base(NULL), count(0){};
-            void Load(uint8_t folderNumber);
+            void Load(uint8_t folderNumber, PlayerLCD::LCD* lcd = NULL);
             inline uint8_t GetFileCount() {return count;};
             PlayerID3::ID3Tag& GetFile(uint8_t index);
             inline PlayerID3::ID3Tag& operator[](uint8_t index) {return GetFile(index);};
@@ -40,7 +41,7 @@ namespace PlayerSD
             uint8_t selected_folder;
             FolderManager folders[99];
         public:
-            FileSystemManager() : root("/"), selected_folder(0){};
+            FileSystemManager(PlayerLCD::LCD* lcd = NULL);
             FolderManager& GetFolder(uint8_t index);
             inline FolderManager& operator[](uint8_t index) {return GetFolder(index);};
             void Print();
