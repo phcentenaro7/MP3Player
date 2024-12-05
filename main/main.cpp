@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <stdio.h>
+#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "sd_card.hpp"
 #include "id3.hpp"
@@ -14,16 +15,12 @@
 
 static const char* TAG = "main";
 static bool readerDone = false;
-static bool playerMounted = false;
-PlayerSD::FileSystemManager fileSystem;
-
-
-void ReaderTask(void* param);
-void PlayerTask(void* param);
-TaskHandle_t readerTaskHandle;
-TaskHandle_t playerTaskHandle;
-
-SemaphoreHandle_t displayMutex = xSemaphoreCreateMutex();
+static PlayerSD::FileSystemManager* fileSystem;
+static PlayerLCD::LCD* lcd;
+    
+void AwaitCardInReader();
+void RetrieveCardData();
+void AwaitCardInPlayer();
 
 extern "C" void app_main()
 {
@@ -32,11 +29,7 @@ extern "C" void app_main()
   	Serial.begin(115200);
 	while(!Serial){};
 
-	LCD_init(PlayerLCD::LCD_ADDRESS, PlayerPins::I2C_SDA, PlayerPins::I2C_SCL, PlayerLCD::NUM_COLUMNS, PlayerLCD::NUM_ROWS);
-	LCD_clearScreen();
-
-	xTaskCreate(ReaderTask, "ReaderTask", 100000, NULL, 0, &readerTaskHandle);
-	//xTaskCreate(PlayerTask, "PlayerTask", 10000, NULL, 0, &playerTaskHandle);
+	lcd = new PlayerLCD::LCD();
 
 	pinMode(PlayerPins::BUTTON_CHOICE_1, INPUT_PULLDOWN);
 	pinMode(PlayerPins::BUTTON_CHOICE_2, INPUT_PULLDOWN);
@@ -44,51 +37,36 @@ extern "C" void app_main()
 
 	while(true)
 	{
-		xSemaphoreTake(displayMutex, portMAX_DELAY);
 		LCD_home();
 		LCD_clearScreen();
 		if(!readerDone)
 		{
-			LCD_writeCentered("Insert SD card", 0);
-			LCD_writeCentered("in reader!", 1);
+			AwaitCardInReader();
+			RetrieveCardData();
 		}
 		else
 		{
-			LCD_writeCentered("Ready to play!", 0);
+			AwaitCardInPlayer();
 		}
-		xSemaphoreGive(displayMutex);
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 }
 
-void ReaderTask(void* param)
+void AwaitCardInReader()
 {
-	while(true)
-	{
-		while(readerDone || !PlayerSD::Initialize()){};
-		xSemaphoreTake(displayMutex, portMAX_DELAY);
-		LCD_home();
-		LCD_clearScreen();
-		LCD_writeCentered("SD inserted!", 0);
-		vTaskDelay(3000 / portTICK_PERIOD_MS);
-		LCD_clearScreen();
-		LCD_writeCentered("Loading...", 0);
-		fileSystem = PlayerSD::FileSystemManager();
-		readerDone = true;
-		xSemaphoreGive(displayMutex);
-		vTaskDelay(5000 / portTICK_PERIOD_MS);
-	}
-	vTaskDelete(NULL);
+	lcd->Write("Insert SD card", "in reader!");
+	while(!PlayerSD::Initialize()){};
 }
 
-void PlayerTask(void* param)
+void RetrieveCardData()
 {
-	while(true)
-	{
-		while(!readerDone)
-		{
-			xSemaphoreTake(displayMutex, portMAX_DELAY);
+	lcd->Write("SD inserted!", "");
+	vTaskDelay(3000 / portTICK_PERIOD_MS);
+	lcd->Write("Loading...", NULL);
+	fileSystem = new PlayerSD::FileSystemManager(lcd);
+	readerDone = true;
+}
 
-		}
-	}
+void AwaitCardInPlayer()
+{
+	lcd->Write("Ready to play!", NULL);
 }
