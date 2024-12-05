@@ -1,10 +1,21 @@
+#ifndef LCD_HPP
+#define LCD_HPP
+
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include "HD44780.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "freertos/timers.h"
+#include "pins.hpp"
+#include "esp_log.h"
+#define LCD_NUM_COLUMNS 16
+#define LCD_NUM_ROWS 2
 
 namespace PlayerLCD
 {
     const uint8_t LCD_ADDRESS = 0x27;
-    const uint8_t NUM_COLUMNS = 16;
-    const uint8_t NUM_ROWS = 2;
     const uint8_t CHAR_FOLDER_INC = 0;
     const uint8_t CHAR_FOLDER_DEC = 1;
     const uint8_t CHAR_TRACK_INC = 2;
@@ -13,7 +24,7 @@ namespace PlayerLCD
     const uint8_t CHAR_VOLUME_DEC = 5;
     const uint8_t CHAR_PLAY = 6;
     const uint8_t CHAR_PAUSE = 7;
-    char specialChars[8][8] = 
+    const char specialChars[8][8] = 
     {
         //CHAR_FOLDER_INC (^)
         {
@@ -104,4 +115,12 @@ namespace PlayerLCD
             0b00000
         }
     };
+    class LCD
+    {
+        public:
+            void Write(const char* upper_row, const char* lower_row);
+            LCD(uint8_t address = PlayerLCD::LCD_ADDRESS, uint8_t sdaPin = PlayerPins::I2C_SDA, uint8_t sclPin = PlayerPins::I2C_SCL, size_t refreshPeriodMs = 20);
+    };
 }
+
+#endif
