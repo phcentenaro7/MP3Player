@@ -12,6 +12,8 @@ namespace PlayerPins
     const uint8_t BUTTON_CHOICE_1 = 14;
     const uint8_t BUTTON_CHOICE_2 = 12;
     const uint8_t BUTTON_SWITCH = 13;
+    const uint8_t SERIAL_RX = 16;
+    const uint8_t SERIAL_TX = 17;
 }
 
 #endif
