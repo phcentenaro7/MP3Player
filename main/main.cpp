@@ -8,6 +8,7 @@
 #include "sd_card.hpp"
 #include "id3.hpp"
 #include "HD44780.h"
+#include "DFRobotDFPlayerMini.h"
 #include "lcd.hpp"
 #include "esp_log.h"
 #include "pins.hpp"
@@ -28,6 +29,11 @@ extern "C" void app_main()
 	initArduino();
   	Serial.begin(115200);
 	while(!Serial){};
+	while(!DF_begin(PlayerPins::SERIAL_TX, PlayerPins::SERIAL_RX, true, true, true))
+	{
+		puts("Trying again");
+		vTaskDelay(1000 / portTICK_PERIOD_MS);
+	};
 
 	lcd = new PlayerLCD::LCD();
 
@@ -68,5 +74,18 @@ void RetrieveCardData()
 
 void AwaitCardInPlayer()
 {
-	lcd->Write("Ready to play!", NULL);
+	lcd->Write("Ready to play!", "");
+	vTaskDelay(10000 / portTICK_PERIOD_MS);
+	lcd->Write("Playing!", NULL);
+	DF_volume(30);
+	playNext:
+	vTaskDelay(1000);
+	DF_next();
+	vTaskDelay(1000);
+	int finished = 0;
+	while(!DF_isFinished(&finished))
+	{
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+	}
+	goto playNext;
 }
