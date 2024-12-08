@@ -10,8 +10,6 @@
 #include "freertos/timers.h"
 #include "pins.hpp"
 #include "esp_log.h"
-#define LCD_NUM_COLUMNS 16
-#define LCD_NUM_ROWS 2
 
 namespace PlayerLCD
 {
@@ -117,8 +115,12 @@ namespace PlayerLCD
     };
     class LCD
     {
+        private:
+            void LoadSpecialCharacters();
         public:
-            void Write(const char* upper_row, const char* lower_row);
+            void SetIconMode(bool value);
+            void Write(const char* text, uint8_t row);
+            void SetIcons(uint8_t icon1, uint8_t icon2, uint8_t icon3, uint8_t icon4);
             LCD(uint8_t address = PlayerLCD::LCD_ADDRESS, uint8_t sdaPin = PlayerPins::I2C_SDA, uint8_t sclPin = PlayerPins::I2C_SCL, size_t refreshPeriodMs = 20);
     };
 }

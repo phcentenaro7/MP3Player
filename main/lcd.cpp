@@ -3,10 +3,12 @@
 static const char* TAG = "LCD";
 static char rows[2][17] = {"", ""};
 static char queuedRows[2][17] = {"", ""};
+static char icons[4] = {' ', ' ', ' ', ' '};
 static SemaphoreHandle_t writeMutex;
 static TaskHandle_t awaitRefreshHandle;
 static TimerHandle_t refreshHandle;
 static bool refresh = false;
+static bool iconMode = false;
 
 static void Tick(TimerHandle_t timerHandle)
 {
@@ -20,24 +22,30 @@ static void AwaitRefresh(void* param)
         if(refresh)
         {
             xSemaphoreTake(writeMutex, portMAX_DELAY);
-            bool rewrite = false;
-            if(strcmp(rows[0], queuedRows[0]))
+            for(uint8_t i = 0; i < 2; i++)
             {
-                strcpy(rows[0], queuedRows[0]);
-                rewrite = true;
-            }
-            if(strcmp(rows[1], queuedRows[1]))
-            {
-                strcpy(rows[1], queuedRows[1]);
-                rewrite = true;
-            }
-            if(rewrite)
-            {
-                LCD_home();
-                LCD_setCursor(0, 0);
-                LCD_clearScreen();
-                LCD_writeCentered(rows[0], 0);
-                LCD_writeCentered(rows[1], 1);
+                if(strcmp(rows[i], queuedRows[i]))
+                {
+                    LCD_setCursor(0, i);
+                    if(strlen(rows[i]) != strlen(queuedRows[i]))
+                    {
+                        LCD_writeStr("                ");
+                    }
+                    strcpy(rows[i], queuedRows[i]);
+                    if(iconMode && i == 1)
+                    {
+                        LCD_setCursor(0, 1);
+                        for(uint8_t i = 0; i < 4; i++)
+                        {
+                            LCD_writeChar(icons[i]);
+                        }
+                        LCD_writeStr(rows[i]);
+                    }
+                    else
+                    {
+                        LCD_writeCentered(rows[i], i);
+                    }
+                }
             }
             refresh = false;
             xSemaphoreGive(writeMutex);
@@ -55,17 +63,38 @@ namespace PlayerLCD
         strcpy(queuedRows[1], "");
         refresh = false;
         LCD_init(address, sdaPin, sclPin, 16, 2);
+        LoadSpecialCharacters();
         writeMutex = xSemaphoreCreateMutex();
         refreshHandle = xTimerCreate("LCD Refresh Timer", pdMS_TO_TICKS(refreshPeriodMs), pdTRUE, (void*)0, Tick);
         xTimerStart(refreshHandle, 0);
         xTaskCreate(AwaitRefresh, "LCD Await Refresh", 10000, NULL, 0, &awaitRefreshHandle);
     }
 
-    void LCD::Write(const char* upper_row, const char* lower_row)
+    void LCD::SetIconMode(bool value)
+    {
+        iconMode = value;
+    }
+
+    void LCD::LoadSpecialCharacters()
+    {
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            LCD_writeToCGRAM(i << 3, specialChars[i]);
+        }
+    }
+
+    void LCD::Write(const char* text, uint8_t row)
     {
         xSemaphoreTake(writeMutex, portMAX_DELAY);
-        if(upper_row) strcpy(queuedRows[0], upper_row);
-	    if(lower_row) strcpy(queuedRows[1], lower_row);
+        strcpy(queuedRows[row], text);
         xSemaphoreGive(writeMutex);
+    }
+
+    void LCD::SetIcons(uint8_t icon1, uint8_t icon2, uint8_t icon3, uint8_t icon4)
+    {
+        icons[0] = icon1;
+        icons[1] = icon2;
+        icons[2] = icon3;
+        icons[3] = icon4;
     }
 }
