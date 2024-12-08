@@ -116,7 +116,7 @@ namespace PlayerSD
                 {
                     char loadedText[10];
                     sprintf(loadedText, "Folder %02d", folderNumber);
-                    lcd->Write(NULL, loadedText);
+                    lcd->Write(loadedText, 1);
                 }
                 AddFile(file);
             }
