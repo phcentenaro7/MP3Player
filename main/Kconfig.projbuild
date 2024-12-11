@@ -1,0 +1,26 @@
+menu "PCF8574 settings"
+
+    config PCF8574_SDA_PIN
+        int "SDA pin"
+        default 32
+        help
+            Pin used for I2C data transference
+
+    config PCF8574_SCL_PIN
+        int "SCL pin"
+        default 33
+        help
+            Pin used as I2C clock
+    
+    config PCF8574_DEV_ADDR
+        hex "Device address"
+        default 0x27
+        help
+            Device I2C address
+
+    config PCF8574_SCL_SPEED_HZ
+        int "SCL speed (Hz)"
+        default 100000
+        help
+            Frequency of I2C clock
+endmenu
