@@ -396,6 +396,11 @@ CONFIG_PCF8574_SCL_SPEED_HZ=100000
 # end of PCF8574 settings
 
 #
+# LCD settings
+#
+# end of LCD settings
+
+#
 # Compiler options
 #
 CONFIG_COMPILER_OPTIMIZATION_DEBUG=y
