@@ -31,10 +31,9 @@ void hd44780_init()
 
 void hd44780_send_byte(char byte)
 {
-    char b = byte;
-    pcf8574_send_byte(b | reg_e | backlight);
+    pcf8574_send_byte(byte | reg_e | backlight);
     ets_delay_us(1);
-    pcf8574_send_byte(b | backlight);
+    pcf8574_send_byte(byte | backlight);
 }
 
 void hd44780_send_nibbles(char byte, char regs)
@@ -77,6 +76,18 @@ void hd44780_function_1602()
     hd44780_send_nibbles(0x28, 0);
 }
 
+esp_err_t hd44780_set_cgram_address(unsigned char addr)
+{
+    if(addr > 0x07)
+    {
+        ESP_LOGE(TAG, "Attempt to set CGRAM address to invalid value 0x%x. Valid interval is 0x00 <= addr <= 0x07.", addr);
+        return ESP_ERR_INVALID_ARG;
+    }
+    char addr_comm = 0x40 | addr;
+    hd44780_send_nibbles(addr_comm, 0);
+    return ESP_OK;
+}
+
 esp_err_t hd44780_set_ddram_address(unsigned char addr)
 {
     if((addr > 0x27 && addr < 0x40) || (0x67 < addr))
@@ -99,12 +110,22 @@ void hd44780_write_string(char* str, unsigned char row, unsigned char col)
 {
     while(*str != '\0')
     {
-        ESP_ERROR_CHECK(hd44780_write_char(*str, row, col));
+        hd44780_write_char(*str, row, col);
         if(++col > 39)
         {
             col = 0;
             row ^= 1;
         }
         str++;
+    }
+}
+
+void hd44780_new_char(unsigned char* pattern, unsigned char addr)
+{
+    addr <<= 3;
+    for(unsigned char row = 0; row < 8; row++)
+    {
+        ESP_ERROR_CHECK(hd44780_set_cgram_address(addr | row));
+        hd44780_send_nibbles(pattern[row], reg_rs);
     }
 }
