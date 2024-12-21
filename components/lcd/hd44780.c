@@ -11,6 +11,16 @@ static const char reg_rs = 0x01;
 static const char reg_e = 0x04;
 static const char backlight = 0x08;
 
+/*
+ * Initializes communication with the HD44780 display.
+ * Consult page 46, figure 24 of the HD44780 datasheet for more information.
+ * The following settings are applied:
+ * - 4-bit communication mode;
+ * - 5x8 characters;
+ * - 2 rows and 16 columns;
+ * - Display initially on, with backlight and no cursor;
+ * - No display shift.
+ */
 void hd44780_init()
 {
     pcf8574_send_byte(0);
@@ -27,8 +37,15 @@ void hd44780_init()
     hd44780_off();
     hd44780_entry_mode();
     hd44780_clear();
+    hd44780_on();
 }
 
+/*
+ * Sends a byte of data to the HD44780.
+ * This process actually sends two bytes of data. The first byte sends the data with the Enable register activated, signaling to the HD44780 that new data is coming.
+ * The second byte is sent 1 us after the first, and is identical to the first, but the Enable register is deactivated. This process is necessary to communicate using the HD44780 is 4-bit mode with the PCF8574.
+ * For more information, consult page 33, figure 17 of the HD44780 datasheet.
+ */
 void hd44780_send_byte(char byte)
 {
     pcf8574_send_byte(byte | reg_e | backlight);
@@ -36,46 +53,64 @@ void hd44780_send_byte(char byte)
     pcf8574_send_byte(byte | backlight);
 }
 
+/*
+ * Sends each nibble of a byte to the HD44780.
+ * This function begins by sending the most significant nibble, then the least significant. After the first nibble is sent, it waits for 1 us. After the second nibble is sent, it waits for 50 us. This is because most commands should take at most 37 us to execute (page 24, table 6 of the HD44780 datasheet).
+ */
 void hd44780_send_nibbles(char byte, char regs)
 {
     hd44780_send_byte((byte & 0xF0) | regs);
-    ets_delay_us(50);
+    ets_delay_us(1);
     hd44780_send_byte((byte << 4) | regs);
     ets_delay_us(50);
 }
 
+// Clears the display.
 void hd44780_clear()
 {
     hd44780_send_nibbles(0x01, 0);
     ets_delay_us(2e3);
 }
 
+// Returns the cursor home, and returns the display to the original position.
 void hd44780_home()
 {
     hd44780_send_nibbles(0x02, 0);
     ets_delay_us(2e3);
 }
 
+// Sets the cursor to move to the right and disables display shift.
 void hd44780_entry_mode()
 {
     hd44780_send_nibbles(0x06, 0);
 }
 
+// Disables the display from showing characters. 
 void hd44780_off()
 {
     hd44780_send_nibbles(0x08, 0);
 }
 
+// Enables the display to show characters.
 void hd44780_on()
 {
     hd44780_send_nibbles(0x0C, 0);
 }
 
+/* Initialization-only function. Configures the display according to the following:
+ * - 4-bit communication mode;
+ * - 5x8 characters;
+ * - 2 rows and 16 columns.
+ */
 void hd44780_function_1602()
 {
     hd44780_send_nibbles(0x28, 0);
 }
 
+/*
+ * Sets the current CGRAM address. Used to write custom characters.
+ * Valid address values for the 5x8 character pattern displays are 0 to 7. Any address outside of this range will result in an error.
+ */
 esp_err_t hd44780_set_cgram_address(unsigned char addr)
 {
     if(addr > 0x07)
@@ -88,6 +123,10 @@ esp_err_t hd44780_set_cgram_address(unsigned char addr)
     return ESP_OK;
 }
 
+/*
+ * Sets the current CGRAM address. Used to write text to the screen.
+ * Valid address values are 0x00 to 0x27 and 0x40 to 0x67. Any address outside of this range will result in an error.
+ */
 esp_err_t hd44780_set_ddram_address(unsigned char addr)
 {
     if((addr > 0x27 && addr < 0x40) || (0x67 < addr))
