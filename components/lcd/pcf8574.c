@@ -5,6 +5,7 @@
 i2c_master_bus_handle_t pcf8574_bus_handle;
 i2c_master_dev_handle_t pcf8574_dev_handle;
 
+//Initializes I2C communication with the PCF8574.
 void pcf8574_init()
 {
     i2c_master_bus_config_t i2c_master_config = 
@@ -26,12 +27,13 @@ void pcf8574_init()
     ESP_ERROR_CHECK(i2c_master_bus_add_device(pcf8574_bus_handle, &dev_config, &pcf8574_dev_handle));
 }
 
-void pcf8574_send_byte(char byte)
+//Sends a byte of data to the PCF8574.
+void pcf8574_send_byte(unsigned char byte)
 {
-    unsigned char b = byte;
-    ESP_ERROR_CHECK(i2c_master_transmit(pcf8574_dev_handle, &b, 1, -1));
+    ESP_ERROR_CHECK(i2c_master_transmit(pcf8574_dev_handle, &byte, 1, -1));
 }
 
+//Finishes communication with the PCF8574, freeing the device and the bus.
 void pcf8574_end()
 {
     ESP_ERROR_CHECK(i2c_master_bus_rm_device(pcf8574_dev_handle));
