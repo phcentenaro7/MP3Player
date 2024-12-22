@@ -1,5 +1,6 @@
 #ifndef HD44780_H
 #define HD44780_H
+#include "esp_check.h"
 
 void hd44780_init();
 
