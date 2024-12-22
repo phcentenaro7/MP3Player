@@ -22,4 +22,11 @@ menu "LCD settings"
         default 100000
         help
             Frequency of I2C clock
+
+    config LCD_REFRESH_PERIOD
+        int "LCD refresh period (ms)"
+        default 50
+        range 10 100
+        help
+            Time the LCD display awaits before updating its contents
 endmenu
