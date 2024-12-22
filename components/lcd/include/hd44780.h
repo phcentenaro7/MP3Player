@@ -14,6 +14,7 @@ void hd44780_function_1602();
 esp_err_t hd44780_set_cgram_address(unsigned char addr);
 esp_err_t hd44780_set_ddram_address(unsigned char addr);
 void hd44780_write_char(char ch, unsigned char row, unsigned char col);
+void hd44780_write_nchars(char* ch, unsigned char n, unsigned char row, unsigned char col);
 void hd44780_write_string(char* str, unsigned char row, unsigned char col);
 void hd44780_new_char(unsigned char* pattern, unsigned char addr);
 

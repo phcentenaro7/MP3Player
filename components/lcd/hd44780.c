@@ -124,7 +124,7 @@ esp_err_t hd44780_set_cgram_address(unsigned char addr)
 }
 
 /*
- * Sets the current CGRAM address. Used to write text to the screen.
+ * Sets the current DDRAM address. Used to write text to the screen.
  * Valid address values are 0x00 to 0x27 and 0x40 to 0x67. Any address outside of this range will result in an error.
  */
 esp_err_t hd44780_set_ddram_address(unsigned char addr)
@@ -139,12 +139,39 @@ esp_err_t hd44780_set_ddram_address(unsigned char addr)
     return ESP_OK;
 }
 
+/*
+ * Writes a character from CGRAM to the designated row and column of the HD44780.
+ * Valid rows are 0 or 1, and valid columns are 0 to 15. Any values outside of this range will result in an error.
+ */
 void hd44780_write_char(char ch, unsigned char row, unsigned char col)
 {
     ESP_ERROR_CHECK(hd44780_set_ddram_address(0x40 * row + col));
     hd44780_send_nibbles(ch, reg_rs);
 }
 
+/*
+ * Writes a string of `n` characters from CGRAM to the HD44780, starting at the designated row and column.
+ * This function wraps around to the first column of the other row, if the string is too big for the current row.
+ * Valid initial rows are 0 or 1, and valid initial columns are 0 to 15. Any values outside of this range will result in an error.
+ */
+void hd44780_write_nchars(char* ch, unsigned char n, unsigned char row, unsigned char col)
+{
+    for(unsigned char i = 0; i < n; i++)
+    {
+        hd44780_write_char(ch[i], row, col);
+        if(++col > 39)
+        {
+            col = 0;
+            row ^= 1;
+        }
+    }
+}
+
+/*
+ * Writes a string of characters from CGRAM to the HD44780, starting at the designated row and column.
+ * This function wraps around to the first column of the other row, if the string is too big for the current row.
+ * Valid initial rows are 0 or 1, and valid initial columns are 0 to 15. Any values outside of this range will result in an error.
+ */
 void hd44780_write_string(char* str, unsigned char row, unsigned char col)
 {
     while(*str != '\0')
@@ -159,6 +186,10 @@ void hd44780_write_string(char* str, unsigned char row, unsigned char col)
     }
 }
 
+/*
+ * Writes a new custom character to CGRAM.
+ * Valid address values for the 5x8 character pattern displays are 0 to 7. Any address outside of this range will result in an error.
+ */
 void hd44780_new_char(unsigned char* pattern, unsigned char addr)
 {
     addr <<= 3;
