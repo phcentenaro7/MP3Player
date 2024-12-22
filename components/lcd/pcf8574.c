@@ -2,8 +2,8 @@
 #include "driver/i2c_master.h"
 #include "sdkconfig.h"
 
-i2c_master_bus_handle_t pcf8574_bus_handle;
-i2c_master_dev_handle_t pcf8574_dev_handle;
+static i2c_master_bus_handle_t pcf8574_bus_handle;
+static i2c_master_dev_handle_t pcf8574_dev_handle;
 
 //Initializes I2C communication with the PCF8574.
 void pcf8574_init()
