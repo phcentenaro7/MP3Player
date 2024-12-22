@@ -1,4 +1,3 @@
-#include "esp_check.h"
 #include "hd44780.h"
 #include "pcf8574.h"
 #include "rom/ets_sys.h"
@@ -159,7 +158,7 @@ void hd44780_write_nchars(char* ch, unsigned char n, unsigned char row, unsigned
     for(unsigned char i = 0; i < n; i++)
     {
         hd44780_write_char(ch[i], row, col);
-        if(++col > 39)
+        if(++col > 15)
         {
             col = 0;
             row ^= 1;
@@ -177,7 +176,7 @@ void hd44780_write_string(char* str, unsigned char row, unsigned char col)
     while(*str != '\0')
     {
         hd44780_write_char(*str, row, col);
-        if(++col > 39)
+        if(++col > 15)
         {
             col = 0;
             row ^= 1;
