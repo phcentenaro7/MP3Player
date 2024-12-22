@@ -398,6 +398,7 @@ CONFIG_PCF8574_SCL_SPEED_HZ=100000
 #
 # LCD settings
 #
+CONFIG_LCD_REFRESH_PERIOD=50
 # end of LCD settings
 
 #
